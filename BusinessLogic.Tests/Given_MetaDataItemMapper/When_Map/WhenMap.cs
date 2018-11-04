@@ -13,11 +13,11 @@ namespace BusinessLogic.Tests.Given_MetaDataItemMapper.When_Map
     {
         private MetadataItem _rootItem;
 
-        public void When_Map(AssemblyMetadataStorage store)
+        public void When_MapStorage()
         {
             try
             {
-                Task.Run(() => { _rootItem = _context.Map(store); }).Wait();
+                Task.Run(() => { _rootItem = _context.Map(_storage); }).Wait();
             }
             catch (AggregateException)
             {
@@ -27,18 +27,114 @@ namespace BusinessLogic.Tests.Given_MetaDataItemMapper.When_Map
         [Test]
         public void And_OnlyAssembly()
         {
-            AssemblyMetadataDto assemblyMetadata = new AssemblyMetadataDto()
+            With_AssemblyMetadata();
+
+            When_MapStorage();
+
+            Then_TreeShouldBe(new MetadataItem(_assemblyName, false));
+        }
+
+        [Test]
+        public void And_AssemblyWithEmptyNamespace()
+        {
+            With_AssemblyMetadata();
+            With_NamespaceMetaData();
+
+            When_MapStorage();
+
+            Then_TreeShouldBe(new MetadataItem(_assemblyName, true)
             {
-                Id = "TestAssembly",
-                Name = "TestAssembly",
-                Namespaces = new List<NamespaceMetadataDto>()
-            };
-            AssemblyMetadataStorage storage = new AssemblyMetadataStorage(assemblyMetadata);
+                Children = { new MetadataItem($"Namespace: {_namespaceName}", false)}
+            });
+        }
 
-            When_Map(storage);
+        [Test]
+        public void And_AssemblyWithNamespaceAndType()
+        {
+            With_AssemblyMetadata();
+            With_NamespaceMetaData();
+            With_TypeMetaData();
 
-            Then_TreeShouldBe(new MetadataItem("TestAssembly", false));
+            When_MapStorage();
 
+            Then_TreeShouldBe(new MetadataItem(_assemblyName, true)
+            {
+                Children =
+                {
+                    new MetadataItem($"Namespace: {_namespaceName}", true)
+                    {
+                        Children = { new MetadataItem($"Enum: {_typeName}", false)}
+                    }
+                }
+            });
+        }
+
+        [Test]
+        public void And_AssemblyWithNamespaceAndTypeWithProperty()
+        {
+            With_AssemblyMetadata();
+            With_NamespaceMetaData();
+            With_TypeMetaData();
+            With_PropertyMetadata();
+
+            When_MapStorage();
+
+            Then_TreeShouldBe(new MetadataItem(_assemblyName, true)
+            {
+                Children =
+                {
+                    new MetadataItem($"Namespace: {_namespaceName}", true)
+                    {
+                        Children =
+                        {
+                            new MetadataItem($"Class: {_typeName}", true)
+                            {
+                                Children =
+                                {
+                                    new MetadataItem($"Property: {_propertyName}", true)
+                                    {
+                                        Children = { new MetadataItem($"Enum: {_secondTypeName}", false)}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        [Test]
+        public void And_AssemblyWithNamespace_AndTypeWithVoidMethod_WithNoParameters()
+        {
+            With_AssemblyMetadata();
+            With_NamespaceMetaData();
+            With_TypeMetaData();
+            With_VoidMethodMetadata(new List<ParameterMetadataDto>());
+
+            When_MapStorage();
+
+            Then_TreeShouldBe(new MetadataItem(_assemblyName, true)
+            {
+                Children =
+                {
+                    new MetadataItem($"Namespace: {_namespaceName}", true)
+                    {
+                        Children =
+                        {
+                            new MetadataItem($"Class: {_typeName}", true)
+                            {
+                                Children =
+                                {
+                                    new MetadataItem($"IsPublic void {_methodName}", false)
+                                    {
+                                       
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         public void Then_TreeShouldBe(MetadataItem correctRoot)

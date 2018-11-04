@@ -12,7 +12,6 @@ namespace BusinessLogic.ViewModel
     public class MainViewModel : ValidatableBindableBase
     {
         private readonly IFilePathGetter _filePathGetter;
-        private readonly ILogger _logger;
         private readonly IMetadataStorageProvider _metadataProvider;
         private readonly IMapper<AssemblyMetadataStorage, MetadataItem> _mapper;
 
@@ -38,12 +37,10 @@ namespace BusinessLogic.ViewModel
 
         public MainViewModel(
             IFilePathGetter filePathGetter,
-            ILogger logger,
             IMetadataStorageProvider metadataProvider,
             IMapper<AssemblyMetadataStorage, MetadataItem> mapper)
         {
             _filePathGetter = filePathGetter;
-            _logger = logger;
             _metadataProvider = metadataProvider;
             _mapper = mapper;
             GetFilePathCommand = new RelayCommand(GetFilePath);

@@ -4,12 +4,12 @@ using System.Reflection;
 using DataContract.Model;
 using Reflector.ExtensionMethods;
 
-namespace Reflector
+namespace Reflector.Model
 {
-    public partial class Reflector
+    internal static class AssemblyLoader
     {
 
-        internal AssemblyMetadataStorage LoadAssemblyMetadata(Assembly assembly)
+        internal static AssemblyMetadataStorage LoadAssemblyMetadata(Assembly assembly)
         {
             AssemblyMetadataDto assemblyMetadata = new AssemblyMetadataDto()
             {
@@ -23,7 +23,7 @@ namespace Reflector
                 where type.IsVisible()
                 group type by type.GetNamespace() into namespaceGroup
                 orderby namespaceGroup.Key
-                select LoadNamespaceMetadata(namespaceGroup.Key, namespaceGroup, metaStore)).ToList();
+                select NamespaceLoader.LoadNamespaceMetadata(namespaceGroup.Key, namespaceGroup, metaStore)).ToList();
 
             return metaStore;
         }

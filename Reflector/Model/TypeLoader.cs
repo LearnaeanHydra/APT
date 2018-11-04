@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Reflector
+namespace Reflector.Model
 {
-    public partial class Reflector
+    internal static class TypeLoader
     {
-        internal TypeMetadataDto LoadTypeMetadataDto(Type type, AssemblyMetadataStorage metaStore)
+        internal static TypeMetadataDto LoadTypeMetadataDto(Type type, AssemblyMetadataStorage metaStore)
         {
             if (type == null)
             {
@@ -38,7 +38,6 @@ namespace Reflector
                         NestedTypes = new List<TypeMetadataDto>()
                     };
 
-                    _logger.Trace("Adding type not declared in assembly being inspected: Id =" + metadataType.Id + " ; Name = " + metadataType.TypeName);
                     metaStore.TypesDictionary.Add(type.FullName, metadataType);
                 }
                 else // load full type information
@@ -53,7 +52,6 @@ namespace Reflector
                         Attributes = type.GetCustomAttributes(false).Cast<Attribute>()
                     };
 
-                    _logger.Trace("Adding type: Id =" + metadataType.Id + " ; Name = " + metadataType.TypeName);
                     metaStore.TypesDictionary.Add(type.FullName, metadataType);
 
                     metadataType.DeclaringType = EmitDeclaringType(type.DeclaringType, metaStore);
@@ -63,30 +61,28 @@ namespace Reflector
 
                     metadataType.GenericArguments = !type.IsGenericTypeDefinition
                         ? new List<TypeMetadataDto>()
-                        : EmitGenericArguments(type.GetGenericArguments(), metaStore);
+                        : TypeLoader.EmitGenericArguments(type.GetGenericArguments(), metaStore);
 
-                    metadataType.Constructors = EmitMethods(type.GetConstructors(), metaStore);
-                    metadataType.Methods = EmitMethods(type.GetMethods(BindingFlags.DeclaredOnly), metaStore);
+                    metadataType.Constructors = MethodLoader.EmitMethods(type.GetConstructors(), metaStore);
+                    metadataType.Methods = MethodLoader.EmitMethods(type.GetMethods(BindingFlags.DeclaredOnly), metaStore);
 
-                    metadataType.Properties = EmitProperties(type.GetProperties(), metaStore);
+                    metadataType.Properties = PropertyLoader.EmitProperties(type.GetProperties(), metaStore);
                 }
 
                 return metadataType;
             }
             else
             {
-                _logger.Trace("Using type already added to dictionary with key: " + type.FullName);
                 return metaStore.TypesDictionary[type.FullName];
-                
             }
         }
 
-        internal IEnumerable<TypeMetadataDto> EmitGenericArguments(IEnumerable<Type> arguments, AssemblyMetadataStorage metaStore)
+        internal static IEnumerable<TypeMetadataDto> EmitGenericArguments(IEnumerable<Type> arguments, AssemblyMetadataStorage metaStore)
         {
             return from Type argument in arguments select LoadTypeMetadataDto(argument, metaStore);
         }
 
-        private TypeMetadataDto EmitExtends(Type baseType, AssemblyMetadataStorage metaStore)
+        private static TypeMetadataDto EmitExtends(Type baseType, AssemblyMetadataStorage metaStore)
         {
             if (baseType == null || baseType == typeof(Object) || baseType == typeof(ValueType) ||
                 baseType == typeof(Enum))
@@ -97,7 +93,7 @@ namespace Reflector
             return LoadTypeMetadataDto(baseType, metaStore);
         }
 
-        private TypeMetadataDto EmitDeclaringType(Type declaringType, AssemblyMetadataStorage metaStore)
+        private static TypeMetadataDto EmitDeclaringType(Type declaringType, AssemblyMetadataStorage metaStore)
         {
             if (declaringType == null)
             {
@@ -107,20 +103,20 @@ namespace Reflector
             return LoadTypeMetadataDto(declaringType, metaStore);
         }
 
-        private IEnumerable<TypeMetadataDto> EmitNestedTypes(IEnumerable<Type> nestedTypes, AssemblyMetadataStorage metaStore)
+        private static IEnumerable<TypeMetadataDto> EmitNestedTypes(IEnumerable<Type> nestedTypes, AssemblyMetadataStorage metaStore)
         {
             return (from type in nestedTypes
                     where type.IsVisible()
                     select LoadTypeMetadataDto(type, metaStore)).ToList();
         }
 
-        private IEnumerable<TypeMetadataDto> EmitImplements(IEnumerable<Type> interfaces, AssemblyMetadataStorage metaStore)
+        private static IEnumerable<TypeMetadataDto> EmitImplements(IEnumerable<Type> interfaces, AssemblyMetadataStorage metaStore)
         {
             return (from currentInterface in interfaces
                     select LoadTypeMetadataDto(currentInterface, metaStore)).ToList();
         }
 
-        private TypeKind GetTypeKind(Type type) // #80 TPA: Reflection - Invalid return value of GetTypeKind()
+        private static TypeKind GetTypeKind(Type type) // #80 TPA: Reflection - Invalid return value of GetTypeKind()
         {
             return type.IsEnum ? TypeKind.EnumType :
                 type.IsValueType ? TypeKind.StructType :
@@ -128,7 +124,7 @@ namespace Reflector
                 TypeKind.ClassType;
         }
 
-        private Tuple<AccessLevel, SealedEnum, AbstractEnum> EmitModifiers(Type type)
+        private static Tuple<AccessLevel, SealedEnum, AbstractEnum> EmitModifiers(Type type)
         {
             AccessLevel accessLevel = AccessLevel.IsPrivate;
             // check if not default

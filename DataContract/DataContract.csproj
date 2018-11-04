@@ -48,7 +48,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="API\ILogger.cs" />
     <Compile Include="API\IMapper.cs" />
     <Compile Include="API\IMetadataStorageProvider.cs" />
     <Compile Include="Model\AssemblyMetadataStorage.cs" />

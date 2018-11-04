@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using BusinessLogic.Model;
+﻿using BusinessLogic.Model;
 using DataContract.API;
 using DataContract.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BusinessLogic.Services
 {
@@ -123,7 +123,7 @@ namespace BusinessLogic.Services
 
         private MetadataItem MapItem(NamespaceMetadataDto value)
         {
-            return new MetadataItem($"Namespace: {value.Id}", true);
+            return new MetadataItem($"Namespace: {value.Id}", value.Types.Any());
         }
 
         private IEnumerable<Relation> GetRelations(TypeMetadataDto value)
@@ -165,10 +165,19 @@ namespace BusinessLogic.Services
             }
         }
 
+        // TODO: handle attributes impact on visibility
         private MetadataItem MapItem(TypeMetadataDto objectToMap)
         {
             return new MetadataItem(
-                $"{objectToMap.TypeKind.ToString().Replace("Type", string.Empty)}: {objectToMap.TypeName}", true);
+                $"{objectToMap.TypeKind.ToString().Replace("Type", string.Empty)}: {objectToMap.TypeName}",
+                objectToMap.BaseType != null
+                || objectToMap.DeclaringType != null
+                || objectToMap.Constructors?.Any() == true
+                || objectToMap.Methods?.Any() == true
+                || objectToMap.GenericArguments?.Any() == true
+                || objectToMap.ImplementedInterfaces?.Any() == true
+                || objectToMap.NestedTypes?.Any() == true
+                || objectToMap.Properties?.Any() == true);
         }
 
         private IEnumerable<Relation> GetRelations(MethodMetadataDto parent)
@@ -195,7 +204,7 @@ namespace BusinessLogic.Services
             return new MetadataItem(
                 $"{objectToMap.Modifiers.Item1} " +
                 $"{objectToMap.ReturnType?.TypeName ?? "void"} " +
-                $"{objectToMap.Name} ",
+                $"{objectToMap.Name}",
                 hasChildren);
         }
     }

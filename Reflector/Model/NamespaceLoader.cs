@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using DataContract.Model;
 
-namespace Reflector
+namespace Reflector.Model
 {
-    public partial class Reflector
+    internal static class NamespaceLoader
     {
-        internal NamespaceMetadataDto LoadNamespaceMetadata(string name, IEnumerable<Type> types, AssemblyMetadataStorage metaStore)
+        internal static NamespaceMetadataDto LoadNamespaceMetadata(string name, IEnumerable<Type> types, AssemblyMetadataStorage metaStore)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -20,10 +20,9 @@ namespace Reflector
                 NamespaceName = name
             };
 
-            _logger.Trace("Adding Namespace to dictionary: " + namespaceMetadata.NamespaceName);
             metaStore.NamespacesDictionary.Add(namespaceMetadata.NamespaceName, namespaceMetadata);
 
-            namespaceMetadata.Types = (from type in types orderby type.Name select LoadTypeMetadataDto(type, metaStore)).ToList();
+            namespaceMetadata.Types = (from type in types orderby type.Name select TypeLoader.LoadTypeMetadataDto(type, metaStore)).ToList();
 
             return namespaceMetadata;
         }
