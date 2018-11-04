@@ -51,7 +51,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
     <Compile Include="Given_MetaDataItemMapper\GivenMetadataItemMapper.cs" />
     <Compile Include="Given_MetaDataItemMapper\When_Map\WhenMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
