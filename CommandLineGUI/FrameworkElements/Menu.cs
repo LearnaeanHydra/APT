@@ -27,6 +27,7 @@ namespace CommandLineGUI.FrameworkElements
             while (notDone)
             {
                 ConsoleKeyInfo key = Console.ReadKey();
+                Console.Clear();
                 foreach (MenuItem menuItem in _menuItems.Where(item => item.Command != null && item.Header.Substring(0, 1) == key.KeyChar.ToString()))
                 {
                     menuItem.Command.Execute(null);

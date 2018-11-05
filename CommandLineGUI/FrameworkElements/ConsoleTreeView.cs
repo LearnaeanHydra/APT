@@ -45,15 +45,13 @@ namespace CommandLineGUI.FrameworkElements
                     {
                         if (_history.Count > 1)
                         {
-
+                            _history.RemoveAt(_history.Count - 1);
                         }
 
-                        if (_history.Any() && _)
+                        if (_history.Any())
                         {
                             MetadataItem currentParent = _history.Last();
-                            _history.RemoveAt(_history.Count - 1);
                             UpdateCurrentItems(currentParent, true);
-                            
                         }
                         else
                         {
@@ -83,7 +81,14 @@ namespace CommandLineGUI.FrameworkElements
         {
             foreach (KeyValuePair<string, MetadataItem> currentItem in _currentItems)
             {
-                Console.WriteLine($"{currentItem.Key} - {currentItem.Value.Name}");
+                if (currentItem.Value.IsExpendable == false)
+                {
+                    Console.WriteLine($"{currentItem.Key} - {currentItem.Value.Name} -- not expendable");
+                }
+                else
+                {
+                    Console.WriteLine($"{currentItem.Key} - {currentItem.Value.Name}");
+                }
             }
         }
     }

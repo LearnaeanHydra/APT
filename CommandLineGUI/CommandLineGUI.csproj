@@ -39,6 +39,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -49,6 +50,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConsoleFilePathGetter.cs" />
+    <Compile Include="FrameworkElements\Binding.cs" />
+    <Compile Include="FrameworkElements\ConsoleTreeView.cs" />
+    <Compile Include="FrameworkElements\FrameworkElement.cs" />
+    <Compile Include="FrameworkElements\Menu.cs" />
+    <Compile Include="FrameworkElements\MenuItem.cs" />
+    <Compile Include="MainView.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -60,6 +68,18 @@
     <ProjectReference Include="..\BusinessLogic\BusinessLogic.csproj">
       <Project>{860a43e1-c86e-48ce-bc74-9c51c207ca30}</Project>
       <Name>BusinessLogic</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DataContract\DataContract.csproj">
+      <Project>{20E38279-9ABB-49CF-89E9-7ADA6A88C494}</Project>
+      <Name>DataContract</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Logging\Logging.csproj">
+      <Project>{913CBE0F-2218-4C13-9BDC-5A22C1F1A0DC}</Project>
+      <Name>Logging</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Reflector\Reflector.csproj">
+      <Project>{0F44BF6A-2A53-4607-B0F6-FDDA2EAAFFDB}</Project>
+      <Name>Reflector</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
