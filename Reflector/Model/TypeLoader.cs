@@ -17,73 +17,146 @@ namespace Reflector
                 throw new ArgumentNullException($"{nameof(type)} argument is null.");
             }
 
-            if (!metaStore.TypesDictionary.ContainsKey(type.FullName))
+            if (type.IsGenericParameter)
             {
-                TypeMetadataDto metadataType;
-                if (type.Assembly.ManifestModule.FullyQualifiedName != metaStore.AssemblyMetadata.Id) // if type is not declared in assembly being inspected
+                return LoadGenericParameterTypeObject(type, metaStore);
+
+            }
+            else
+            {
+                if (!metaStore.TypesDictionary.ContainsKey(type.FullName))
                 {
-                    metadataType = new TypeMetadataDto // add only basic information
-                    {
-                        Id = type.FullName,
-                        TypeName = type.Name,
-                        NamespaceName = type.Namespace,
-                        Modifiers = EmitModifiers(type),
-                        TypeKind = GetTypeKind(type),
-                        Attributes = type.GetCustomAttributes(false).Cast<Attribute>(),
-                        Properties = new List<PropertyMetadataDto>(),
-                        Constructors = new List<MethodMetadataDto>(),
-                        GenericArguments = new List<TypeMetadataDto>(),
-                        ImplementedInterfaces = new List<TypeMetadataDto>(),
-                        Methods = new List<MethodMetadataDto>(),
-                        NestedTypes = new List<TypeMetadataDto>()
-                    };
+                    TypeMetadataDto metadataType;
 
-                    _logger.Trace("Adding type not declared in assembly being inspected: Id =" + metadataType.Id + " ; Name = " + metadataType.TypeName);
-                    metaStore.TypesDictionary.Add(type.FullName, metadataType);
+                    // if type is not declared in assembly being inspected
+                    if (type.Assembly.ManifestModule.FullyQualifiedName != metaStore.AssemblyMetadata.Id) // load basic info
+                    {
+                        metadataType = LoadSimpleTypeObject(type, metaStore);
+                    }
+                    else // load full type information
+                    {
+                        metadataType = LoadFullTypeObject(type, metaStore);
+                    }
+
+                    return metadataType;
                 }
-                else // load full type information
+                else
                 {
-                    metadataType = new TypeMetadataDto()
-                    {
-                        Id = type.FullName,
-                        TypeName = type.Name,
-                        NamespaceName = type.Namespace,
-                        Modifiers = EmitModifiers(type),
-                        TypeKind = GetTypeKind(type),
-                        Attributes = type.GetCustomAttributes(false).Cast<Attribute>()
-                    };
+                    _logger.Trace("Using type already added to dictionary with key: " + type.FullName);
+                    return metaStore.TypesDictionary[type.FullName];
 
-                    _logger.Trace("Adding type: Id =" + metadataType.Id + " ; Name = " + metadataType.TypeName);
-                    metaStore.TypesDictionary.Add(type.FullName, metadataType);
-
-                    metadataType.DeclaringType = EmitDeclaringType(type.DeclaringType, metaStore);
-                    metadataType.ImplementedInterfaces = EmitImplements(type.GetInterfaces(), metaStore);
-                    metadataType.BaseType = EmitExtends(type.BaseType, metaStore);
-                    metadataType.NestedTypes = EmitNestedTypes(type.GetNestedTypes(), metaStore);
-
-                    metadataType.GenericArguments = !type.IsGenericTypeDefinition
-                        ? new List<TypeMetadataDto>()
-                        : EmitGenericArguments(type.GetGenericArguments(), metaStore);
-
-                    metadataType.Constructors = EmitMethods(type.GetConstructors(), metaStore);
-                    metadataType.Methods = EmitMethods(type.GetMethods(BindingFlags.DeclaredOnly), metaStore);
-
-                    metadataType.Properties = EmitProperties(type.GetProperties(), metaStore);
                 }
+            }
+        }
 
+        private TypeMetadataDto LoadGenericParameterTypeObject(Type type, AssemblyMetadataStorage metaStore)
+        {
+            TypeMetadataDto metadataType;
+            string id = $"{type.DeclaringType.FullName}<{type.Name}>";
+
+            _logger.Trace("Adding generic argument type with Id =" + id);
+
+            if (!metaStore.TypesDictionary.ContainsKey(id))
+            {
+                metadataType = new TypeMetadataDto()
+                {
+                    Id = id,
+                    TypeName = type.Name,
+                    NamespaceName = type.Namespace,
+                    Modifiers = null,
+                    TypeKind = GetTypeKind(type),
+                    Attributes = new List<Attribute>(),
+                    Properties = new List<PropertyMetadataDto>(),
+                    Constructors = new List<MethodMetadataDto>(),
+                    ImplementedInterfaces = new List<TypeMetadataDto>(),
+                    Methods = new List<MethodMetadataDto>(),
+                    NestedTypes = new List<TypeMetadataDto>(),
+                    GenericArguments = new List<TypeMetadataDto>()
+                };
+                metaStore.TypesDictionary.Add(metadataType.Id, metadataType);
                 return metadataType;
             }
             else
             {
-                _logger.Trace("Using type already added to dictionary with key: " + type.FullName);
-                return metaStore.TypesDictionary[type.FullName];
-                
+                return metaStore.TypesDictionary[id];
             }
+        }
+
+        private TypeMetadataDto LoadSimpleTypeObject(Type type, AssemblyMetadataStorage metaStore)
+        {
+            TypeMetadataDto metadataType;
+            metadataType = new TypeMetadataDto // add only basic information
+            {
+                Id = type.FullName,
+                TypeName = type.Name,
+                NamespaceName = type.Namespace,
+                Modifiers = EmitModifiers(type),
+                TypeKind = GetTypeKind(type),
+                Attributes = type.GetCustomAttributes(false).Cast<Attribute>(),
+                Properties = new List<PropertyMetadataDto>(),
+                Constructors = new List<MethodMetadataDto>(),
+                ImplementedInterfaces = new List<TypeMetadataDto>(),
+                Methods = new List<MethodMetadataDto>(),
+                NestedTypes = new List<TypeMetadataDto>()
+            };
+
+            metaStore.TypesDictionary.Add(type.FullName, metadataType);
+
+            if (type.IsGenericTypeDefinition)
+            {
+                metadataType.GenericArguments = EmitGenericArguments(type.GetGenericArguments(), metaStore);
+                metadataType.TypeName =
+                    $"{type.Name}<{metadataType.GenericArguments.Select(a => a.TypeName).Aggregate((p, n) => $"{p}, {n}")}>";
+            }
+            else
+            {
+                metadataType.GenericArguments = new List<TypeMetadataDto>();
+            }
+
+            _logger.Trace("Adding type not declared in assembly being inspected: Id =" + metadataType.Id + " ; Name = " + metadataType.TypeName);
+            return metadataType;
+        }
+
+        private TypeMetadataDto LoadFullTypeObject(Type type, AssemblyMetadataStorage metaStore)
+        {
+            TypeMetadataDto metadataType = new TypeMetadataDto()
+            {
+                Id = type.FullName,
+                TypeName = type.Name,
+                NamespaceName = type.Namespace,
+                Modifiers = EmitModifiers(type),
+                TypeKind = GetTypeKind(type),
+                Attributes = type.GetCustomAttributes(false).Cast<Attribute>()
+            };
+            _logger.Trace("Adding type: Id =" + metadataType.Id + " ; Name = " + metadataType.TypeName);
+            metaStore.TypesDictionary.Add(type.FullName, metadataType);
+
+            metadataType.DeclaringType = EmitDeclaringType(type.DeclaringType, metaStore);
+            metadataType.ImplementedInterfaces = EmitImplements(type.GetInterfaces(), metaStore);
+            metadataType.BaseType = EmitExtends(type.BaseType, metaStore);
+            metadataType.NestedTypes = EmitNestedTypes(type.GetNestedTypes(), metaStore);
+
+            if (type.IsGenericTypeDefinition)
+            {
+                metadataType.GenericArguments = EmitGenericArguments(type.GetGenericArguments(), metaStore);
+                metadataType.TypeName =
+                    $"{type.Name}<{metadataType.GenericArguments.Select(a => a.TypeName).Aggregate((p, n) => $"{p}, {n}")}>";
+            }
+            else
+            {
+                metadataType.GenericArguments = new List<TypeMetadataDto>();
+            }
+
+            metadataType.Constructors = EmitMethods(type.GetConstructors(), metaStore);
+            metadataType.Methods = EmitMethods(type.GetMethods(BindingFlags.DeclaredOnly), metaStore);
+
+            metadataType.Properties = EmitProperties(type.GetProperties(), metaStore);
+            return metadataType;
         }
 
         internal IEnumerable<TypeMetadataDto> EmitGenericArguments(IEnumerable<Type> arguments, AssemblyMetadataStorage metaStore)
         {
-            return from Type argument in arguments select LoadTypeMetadataDto(argument, metaStore);
+            return (from Type argument in arguments select LoadTypeMetadataDto(argument, metaStore)).ToList();
         }
 
         private TypeMetadataDto EmitExtends(Type baseType, AssemblyMetadataStorage metaStore)
