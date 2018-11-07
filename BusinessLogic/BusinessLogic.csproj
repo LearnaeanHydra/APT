@@ -54,6 +54,7 @@
     <Compile Include="Base\RelayCommand.cs" />
     <Compile Include="Base\SimpleAsyncCommand.cs" />
     <Compile Include="Base\TaskUtilities.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Model\MetadataItem.cs" />
     <Compile Include="Model\Relation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

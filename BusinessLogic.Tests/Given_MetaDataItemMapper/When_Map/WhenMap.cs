@@ -137,6 +137,55 @@ namespace BusinessLogic.Tests.Given_MetaDataItemMapper.When_Map
             });
         }
 
+        [Test]
+        public void And_AssemblyWithNamespace_AndTypeWithVoidMethod_WithParameters()
+        {
+            With_AssemblyMetadata();
+            With_NamespaceMetaData();
+            With_TypeMetaData();
+            With_VoidMethodMetadata(new List<ParameterMetadataDto>()
+            {
+                new ParameterMetadataDto(_parameterName, CreateSimpleTypeMetadata(_thirdTypeName))
+                {
+                    Id = _parameterName
+                }
+            });
+
+            When_MapStorage();
+
+            Then_TreeShouldBe(new MetadataItem(_assemblyName, true)
+            {
+                Children =
+                {
+                    new MetadataItem($"Namespace: {_namespaceName}", true)
+                    {
+                        Children =
+                        {
+                            new MetadataItem($"Class: {_typeName}", true)
+                            {
+                                Children =
+                                {
+                                    new MetadataItem($"IsPublic void {_methodName}", true)
+                                    {
+                                        Children =
+                                        {
+                                            new MetadataItem($"Parameter: {_parameterName}", true)
+                                            {
+                                                Children =
+                                                {
+                                                    new MetadataItem($"Enum: {_thirdTypeName}", false)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
         public void Then_TreeShouldBe(MetadataItem correctRoot)
         {
             _rootItem.Should().BeEquivalentTo(correctRoot);

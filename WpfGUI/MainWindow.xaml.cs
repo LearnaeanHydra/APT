@@ -1,7 +1,7 @@
-﻿using System.Windows;
-using BusinessLogic.Services;
+﻿using BusinessLogic.Services;
 using BusinessLogic.ViewModel;
 using Logging;
+using System.Windows;
 
 namespace WpfGUI
 {
@@ -20,8 +20,7 @@ namespace WpfGUI
                 new FileDialog(logger),
                 logger,
                 new Reflector.Reflector(logger),
-                new MetadataItemMapper()
-            );
+                new MetadataItemMapper());
         }
     }
 }

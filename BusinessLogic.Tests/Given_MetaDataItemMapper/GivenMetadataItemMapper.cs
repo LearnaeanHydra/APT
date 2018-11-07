@@ -18,8 +18,10 @@ namespace BusinessLogicTests.Given_MetaDataItemMapper
         protected const string _namespaceName = "TestNamespace";
         protected const string _typeName = "TestType";
         protected const string _secondTypeName = "2TestType";
+        protected const string _thirdTypeName = "3TestType";
         protected const string _propertyName = "TestProperty";
         protected const string _methodName = "TestMethod";
+        protected const string _parameterName = "TestParameter";
         protected const AccessLevel _typeAccessLevel = AccessLevel.IsPublic;
         protected const AccessLevel _methodAccessLevel = AccessLevel.IsPublic;
 
@@ -99,11 +101,17 @@ namespace BusinessLogicTests.Given_MetaDataItemMapper
                 Parameters = parameters
             };
 
+            foreach (ParameterMetadataDto parameterMetadataDto in parameters)
+            {
+                _storage.ParametersDictionary.Add(parameterMetadataDto.Id, parameterMetadataDto);   
+                _storage.TypesDictionary.Add(parameterMetadataDto.TypeMetadata.Id, parameterMetadataDto.TypeMetadata);
+            }
+
             (typeMetadata.Methods as List<MethodMetadataDto>).Add(methodMetadata);
             _storage.MethodsDictionary.Add(methodMetadata.Id, methodMetadata);
         }
 
-        private TypeMetadataDto CreateSimpleTypeMetadata(string typeName)
+        protected TypeMetadataDto CreateSimpleTypeMetadata(string typeName)
         {
             return new TypeMetadataDto // add only basic information
             {
