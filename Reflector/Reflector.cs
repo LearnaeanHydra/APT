@@ -1,31 +1,26 @@
 ﻿using System.Reflection;
-using DataContract.API;
-using DataContract.Model;
-
+using Reflector.Model;
 
 namespace Reflector
 {
-    public partial class Reflector : IMetadataStorageProvider
+    public class Reflector
     {
-        private ILogger _logger;
-
-        public Reflector(ILogger logger)
+        public AssemblyModel AssemblyModel { get; private set; }
+        public Reflector(Assembly assembly)
         {
-            _logger = logger;
+            AssemblyModel = new AssemblyModel(assembly);
+        }
+        public Reflector(AssemblyModel assemblyModel)
+        {
+            AssemblyModel = assemblyModel;
         }
 
-        public AssemblyMetadataStorage GetMetadataStorage(string assemblyFile)
+        public Reflector(string assemblyPath)
         {
-            
-            if (string.IsNullOrEmpty(assemblyFile))
-            {
-                throw new System.ArgumentNullException($"Could not find assembly file such with path: {assemblyFile}");
-            }
-
-            Assembly assembly = Assembly.LoadFrom(assemblyFile);
-            _logger.Trace("Opening assembly: " + assembly.FullName);
-
-            return LoadAssemblyMetadata(assembly);
+            if (string.IsNullOrEmpty(assemblyPath))
+                throw new System.ArgumentNullException();
+            Assembly assembly = Assembly.LoadFrom(assemblyPath);
+            AssemblyModel = new AssemblyModel(assembly);
         }
     }
 }

@@ -1,9 +1,9 @@
 ﻿using BusinessLogic.Services;
 using DataContract.Model;
-using DataContract.Model.Enums;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using DataContract.Enums;
 
 namespace BusinessLogicTests.Given_MetaDataItemMapper
 {

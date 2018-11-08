@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfGUI"
+        xmlns:converters="clr-namespace:WpfGUI.Converters"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
@@ -16,15 +17,22 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="9*"/>
         </Grid.RowDefinitions>
-        <TextBlock Padding="7" Text="{Binding FilePath}" Grid.Row="0" Grid.Column="0"/>
-        <Button MinWidth="60" MinHeight="30" Background="Azure" Content="Search files" Command="{Binding GetFilePathCommand}" Grid.Row="0" Grid.Column="1"/>
+        <TextBlock Padding="7" Text="{Binding PathVariable}" Grid.Row="0" Grid.Column="0"/>
         <Button MinWidth="60" MinHeight="30" Background="Azure" Content="Load metadata" Command="{Binding LoadMetadataCommand}" Grid.Row="0" Grid.Column="2"/>
-        <TreeView Padding="20" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding TreeItems}">
+        <TreeView Padding="20" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding HierarchicalAreas}">
             <TreeView.ItemTemplate>
                  <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                    <TextBlock Text="{Binding Name}"></TextBlock>
+                     <StackPanel  Orientation="Horizontal">
+                         <TextBlock Padding="0 0 10 0" FontWeight="ExtraBold" Text="{Binding Path=ItemType, Converter={x:Static converters:ItemTypeEnumToStringConverter.Instance}}"/>
+                         <TextBlock FontWeight="Bold" Text="{Binding Path=Name}" Foreground="{Binding Path=ItemType, Converter={x:Static converters:ItemTypeToBrushConverter.Instance}}" Margin="0 0 4 0"/>
+                     </StackPanel>
                 </HierarchicalDataTemplate>
              </TreeView.ItemTemplate>
-         </TreeView> 
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="{x:Type TreeViewItem}">
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded,Mode=TwoWay}"/>
+                </Style>
+            </TreeView.ItemContainerStyle>
+        </TreeView> 
     </Grid>
 </Window>

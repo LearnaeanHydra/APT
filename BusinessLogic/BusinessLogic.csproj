@@ -54,14 +54,19 @@
     <Compile Include="Base\RelayCommand.cs" />
     <Compile Include="Base\SimpleAsyncCommand.cs" />
     <Compile Include="Base\TaskUtilities.cs" />
-    <Compile Include="Model\MetadataItem.cs" />
-    <Compile Include="Model\Relation.cs" />
+    <Compile Include="Model\AssemblyTreeItem.cs" />
+    <Compile Include="Model\ItemTypeEnum.cs" />
+    <Compile Include="Model\MethodTreeItem.cs" />
+    <Compile Include="Model\NamespaceTreeItem.cs" />
+    <Compile Include="Model\ParameterTreeItem.cs" />
+    <Compile Include="Model\PropertyTreeItem.cs" />
+    <Compile Include="Model\TreeViewItem.cs" />
+    <Compile Include="Model\TypeTreeItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="API\IFilePathGetter.cs" />
     <Compile Include="Base\BindableBase.cs" />
-    <Compile Include="Services\MetadataItemMapper.cs" />
-    <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="Base\ValidatableBindableBase.cs" />
+    <Compile Include="ViewModel\MainViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DataContract\DataContract.csproj">

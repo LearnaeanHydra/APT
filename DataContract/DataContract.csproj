@@ -49,22 +49,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\ILogger.cs" />
-    <Compile Include="API\IMapper.cs" />
-    <Compile Include="API\IMetadataStorageProvider.cs" />
-    <Compile Include="Model\AssemblyMetadataStorage.cs" />
-    <Compile Include="Model\AssemblyMetadataDto.cs" />
-    <Compile Include="Model\BaseMetadataDto.cs" />
-    <Compile Include="Model\Enums\AbstractEnum.cs" />
-    <Compile Include="Model\Enums\AccessLevel.cs" />
-    <Compile Include="Model\Enums\TypeKind.cs" />
-    <Compile Include="Model\Enums\SealedEnum.cs" />
-    <Compile Include="Model\Enums\StaticEnum.cs" />
-    <Compile Include="Model\Enums\VirtualEnum.cs" />
-    <Compile Include="Model\MethodMetadataDto.cs" />
-    <Compile Include="Model\NamespaceMetadataDto.cs" />
-    <Compile Include="Model\ParameterMetadataDto.cs" />
-    <Compile Include="Model\PropertyMetadataDto.cs" />
-    <Compile Include="Model\TypeMetadataDto.cs" />
+    <Compile Include="Enums\AbstractEnum.cs" />
+    <Compile Include="Enums\AccessLevel.cs" />
+    <Compile Include="Enums\TypeKind.cs" />
+    <Compile Include="Enums\SealedEnum.cs" />
+    <Compile Include="Enums\StaticEnum.cs" />
+    <Compile Include="Enums\VirtualEnum.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

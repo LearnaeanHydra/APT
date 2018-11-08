@@ -1,70 +1,56 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Reflection;
 using System.Windows.Input;
 using BusinessLogic.API;
 using BusinessLogic.Base;
 using BusinessLogic.Model;
 using DataContract.API;
-using DataContract.Model;
 
 namespace BusinessLogic.ViewModel
 {
-    public class MainViewModel : ValidatableBindableBase
+    public class MainViewModel : BindableBase
     {
-        private readonly IFilePathGetter _filePathGetter;
-        private readonly ILogger _logger;
-        private readonly IMetadataStorageProvider _metadataProvider;
-        private readonly IMapper<AssemblyMetadataStorage, MetadataItem> _mapper;
-
-        private string _filePath;
-
-        public string FilePath
-        {
-            get => _filePath;
-            set => SetPropertyAndValidate(ref _filePath, value);
-        }
-
-        public ICommand GetFilePathCommand { get; }
-
         public ICommand LoadMetadataCommand { get; }
 
-        private List<MetadataItem> _treeItems;
+        public IFilePathGetter PathLoader { get; set; }
 
-        public List<MetadataItem> TreeItems
+        public ILogger Logger { get; set; }
+
+        private Reflector.Reflector _reflector;
+
+        private string _pathVariable;
+
+        public ObservableCollection<TreeViewItem> HierarchicalAreas { get; set; }
+
+        public string PathVariable
         {
-            get => _treeItems;
-            set => SetProperty(ref _treeItems, value);
+            get => _pathVariable;
+            set => SetProperty(ref _pathVariable, value);
         }
 
-        public MainViewModel(
-            IFilePathGetter filePathGetter,
-            ILogger logger,
-            IMetadataStorageProvider metadataProvider,
-            IMapper<AssemblyMetadataStorage, MetadataItem> mapper)
+        public MainViewModel()
         {
-            _filePathGetter = filePathGetter;
-            _logger = logger;
-            _metadataProvider = metadataProvider;
-            _mapper = mapper;
-            GetFilePathCommand = new RelayCommand(GetFilePath);
-            LoadMetadataCommand = new SimpleAsyncCommand(LoadMetadata);
-            TreeItems = new List<MetadataItem>();
+            HierarchicalAreas = new ObservableCollection<TreeViewItem>();
+            LoadMetadataCommand = new RelayCommand(Open);
         }
 
-        private void GetFilePath()
+        private void Open()
         {
-            FilePath = _filePathGetter.GetFilePath();
-        }
-
-        private async Task LoadMetadata()
-        {
-            Task toDo = new Task(() =>
+            string path = PathLoader.GetFilePath();
+            if (path == null || !path.Contains(".dll")) return;
+            PathVariable = path;
+            try
             {
-                AssemblyMetadataStorage storage = _metadataProvider.GetMetadataStorage(FilePath);
-                TreeItems = new List<MetadataItem>() { _mapper.Map(storage) };
-            });
-            toDo.Start();
-            await toDo.ConfigureAwait(false);
+                _reflector = new Reflector.Reflector(Assembly.LoadFrom(PathVariable));
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+
+            // TODO clear?
+            HierarchicalAreas.Add(new AssemblyTreeItem(_reflector.AssemblyModel));
         }
     }
 }

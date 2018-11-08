@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using BusinessLogic.Services;
 using BusinessLogic.ViewModel;
 using Logging;
 
@@ -16,12 +15,11 @@ namespace WpfGUI
 
             Logger logger = new Logger();
 
-            DataContext = new MainViewModel(
-                new FileDialog(logger),
-                logger,
-                new Reflector.Reflector(logger),
-                new MetadataItemMapper()
-            );
+            DataContext = new MainViewModel()
+            {
+                Logger = logger,
+                PathLoader = new FileDialog(logger)
+            };
         }
     }
 }

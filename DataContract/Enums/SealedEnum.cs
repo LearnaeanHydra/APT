@@ -1,4 +1,4 @@
-﻿namespace DataContract.Model.Enums
+﻿namespace DataContract.Enums
 {
     public enum SealedEnum
     {
